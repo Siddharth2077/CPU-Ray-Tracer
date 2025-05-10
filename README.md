@@ -25,14 +25,26 @@ This implementation follows the structure and concepts introduced in:
 - C++17 or later
 - Standard C++ libraries only (no external dependencies)
 
-## Building
+## Build and Run
 
 ### Using CMake (Recommended)
 
-```bash
+```
 git clone https://github.com/Siddharth2077/CPU-Ray-Tracer.git
-cd raytracing-in-one-weekend
+```
+```
+cd CPU-Ray-Tracer
+```
+```
 mkdir build && cd build
+```
+```
 cmake ..
-make
+```
+```
+cd ..
+cmake --build build --config release
+```
+```
+.\build\Release\cpu-raytracing-part-i.exe > image.ppm
 ```
