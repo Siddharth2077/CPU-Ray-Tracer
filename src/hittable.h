@@ -1,35 +1,43 @@
-#pragma once
+#ifndef HITTABLE_H
+#define HITTABLE_H
+//==============================================================================================
+// Originally written in 2016 by Peter Shirley <ptrshrl@gmail.com>
+//
+// To the extent possible under law, the author(s) have dedicated all copyright and related and
+// neighboring rights to this software to the public domain worldwide. This software is
+// distributed without any warranty.
+//
+// You should have received a copy (see file COPYING.txt) of the CC0 Public Domain Dedication
+// along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+//==============================================================================================
 
-#include "raytracer.h"
+class material;
 
-class hit_record;
-
-/// @brief Abstract class for any object that's hittable by a ray to render on the scene.
-class hittable {
-public:
-
-    virtual ~hittable() = default;
-
-    virtual bool hit(const ray& r, float ray_tmin, float ray_tmax, hit_record& hit_rec) const = 0;
-    
-};
 
 class hit_record {
-public:
-    point3 hit_point;
-    vector3 hit_normal;
-    float t;
-    bool hit_front_face;
+  public:
+    point3 p;
+    vec3 normal;
+    shared_ptr<material> mat;
+    double t;
+    bool front_face;
 
-    // Sets the hit record normal vector and decides if it hit front face or not.
-    /// @param r Ray
-    /// @param outward_normal Takes in the unit normal vector of the hit (ensure that it's a normalized vector).
-    void set_face_normal(const ray& r, const vector3& outward_normal) {
-        // If dot product < 0 = hit the front face (ray and outward normal are in same direction)
-        // If dot product > 0 = hit the back face (ray and outward normal are opposite direction)
-        hit_front_face = dot_product(r.direction(), outward_normal) < 0 ? true : false;
-        hit_normal = hit_front_face ? outward_normal : -outward_normal;
+    void set_face_normal(const ray& r, const vec3& outward_normal) {
+        // Sets the hit record normal vector.
+        // NOTE: the parameter `outward_normal` is assumed to have unit length.
+
+        front_face = dot(r.direction(), outward_normal) < 0;
+        normal = front_face ? outward_normal : -outward_normal;
     }
 };
 
 
+class hittable {
+  public:
+    virtual ~hittable() = default;
+
+    virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0;
+};
+
+
+#endif

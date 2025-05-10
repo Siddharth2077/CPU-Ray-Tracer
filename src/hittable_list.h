@@ -1,40 +1,50 @@
-#pragma once
+#ifndef HITTABLE_LIST_H
+#define HITTABLE_LIST_H
+//==============================================================================================
+// Originally written in 2016 by Peter Shirley <ptrshrl@gmail.com>
+//
+// To the extent possible under law, the author(s) have dedicated all copyright and related and
+// neighboring rights to this software to the public domain worldwide. This software is
+// distributed without any warranty.
+//
+// You should have received a copy (see file COPYING.txt) of the CC0 Public Domain Dedication
+// along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+//==============================================================================================
 
-#include "raytracer.h"
 #include "hittable.h"
+
 #include <vector>
 
+
 class hittable_list : public hittable {
-public:
-    // Members:
+  public:
     std::vector<shared_ptr<hittable>> objects;
 
-    // Constructors:
     hittable_list() {}
-    hittable_list(shared_ptr<hittable> object) {
-        add_object_to_list(object);
+    hittable_list(shared_ptr<hittable> object) { add(object); }
+
+    void clear() { objects.clear(); }
+
+    void add(shared_ptr<hittable> object) {
+        objects.push_back(object);
     }
 
-    // Methods:
-    inline void add_object_to_list(shared_ptr<hittable> object) {objects.push_back(object);}
-    inline void clear_objects_list() {objects.clear();}
+    bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+        hit_record temp_rec;
+        bool hit_anything = false;
+        auto closest_so_far = ray_t.max;
 
-    // Overrides:
-    bool hit(const ray& r, float ray_tmin, float ray_tmax, hit_record& hit_rec) const override {
-        hit_record temp_hit_record;
-        bool hit_anything {false};
-        float closest_hit_so_far = ray_tmax;
-
-        // Iterate through each object, find the closest hit for this ray (like depth test)
         for (const auto& object : objects) {
-            if (object->hit(r, ray_tmin, closest_hit_so_far, temp_hit_record)) {
+            if (object->hit(r, interval(ray_t.min, closest_so_far), temp_rec)) {
                 hit_anything = true;
-                closest_hit_so_far = temp_hit_record.t;
-                hit_rec = temp_hit_record;                  // update the main hit record (passed into the function)
+                closest_so_far = temp_rec.t;
+                rec = temp_rec;
             }
         }
 
         return hit_anything;
     }
-
 };
+
+
+#endif
